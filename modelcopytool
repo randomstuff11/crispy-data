@@ -1,0 +1,33 @@
+import win32com.client
+
+def open_mart_model_and_save_as_new(erwin_mart_path, original_model_name, new_model_name):
+    # Connect to erwin API
+    erwinApp = win32com.client.Dispatch("erwin.Application")
+    erwinApp.Visible = True
+    
+    # Connect to the Mart
+    mart = erwinApp.MartSets("Default Mart Set").Marts(erwin_mart_path)
+    mart.Login("username", "password")  # Replace with your credentials
+
+    # Open the model from the Mart
+    model = mart.Models.Item(original_model_name)
+    if model is None:
+        print(f"Model named {original_model_name} not found in the Mart.")
+        return
+    model.Open()
+
+    # Here you can make changes to the model if necessary
+
+    # Save the model under a new name
+    model.SaveAs(new_model_name)
+
+    # Close the model and clean up
+    model.Close()
+    mart.Logout()
+    erwinApp.Quit()
+
+# Example usage
+erwin_mart_path = 'your_erwin_mart_path'
+original_model_name = 'original_model_name'
+new_model_name = 'new_model_name'
+open_mart_model_and_save_as_new(erwin_mart_path, original_model_name, new_model_name)
