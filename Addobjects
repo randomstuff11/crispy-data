@@ -18,7 +18,6 @@ def update_erwin_model(excel_path, erwin_model_path):
         attribute_definition = row['AttributeDefinition']
         attribute_datatype = row['Datatype']
         column_definition = row['ColumnDefinition']
-        udp_value = row['UDPValue']
 
         # Access or create the entity in the model
         entity = model.Entities.Item(entity_name)
@@ -34,13 +33,16 @@ def update_erwin_model(excel_path, erwin_model_path):
         attribute.Datatype = attribute_datatype
         attribute.PhysicalName = column_definition
 
-        # Set UDP (User-Defined Property)
-        if 'UDPName' in row and pd.notna(row['UDPName']):
-            udp_name = row['UDPName']
-            udp = attribute.UserDefinedProperties.Item(udp_name)
-            if udp is None:
-                udp = attribute.UserDefinedProperties.Add(udp_name)
-            udp.Value = udp_value
+        # Set all UDPs
+        for column in df.columns:
+            if column.startswith('UDP'):
+                udp_name = column[3:]  # Remove 'UDP' prefix to get the actual UDP name
+                udp_value = row[column]
+                if pd.notna(udp_value):
+                    udp = attribute.UserDefinedProperties.Item(udp_name)
+                    if udp is None:
+                        udp = attribute.UserDefinedProperties.Add(udp_name)
+                    udp.Value = udp_value
 
     # Save the changes
     model.Save()
